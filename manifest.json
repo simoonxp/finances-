@@ -1,0 +1,13 @@
+{
+  "name": "Casal Finanças",
+  "short_name": "Casal Finanças",
+  "description": "Orçamento conjunto para dois.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#090909",
+  "theme_color": "#050505",
+  "lang": "pt-BR",
+  "icons": [
+    { "src": "/icon-180.png", "sizes": "180x180", "type": "image/png", "purpose": "any maskable" }
+  ]
+}
