@@ -366,3 +366,14 @@ input[type='range'] { width: 100%; accent-color: var(--peach); }
 .log-text { min-width: 0; overflow-wrap: anywhere; }
 .field input[readonly] { color: var(--ink); }
 @media (max-width: 420px) { .log-item { grid-template-columns: 1fr; gap: 2px; } }
+
+.rule-list { display: grid; gap: 16px; }
+.rule-head, .rule-foot { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
+.rule-name { font-weight: 600; font-size: 14px; }
+.rule-name small, .rule-amount small { color: var(--muted); font-weight: 400; font-size: 11px; }
+.rule-amount { font-size: 14px; font-variant-numeric: tabular-nums; }
+.rule-head { margin-bottom: 8px; }
+.rule-foot { margin-top: 6px; color: var(--muted); font-size: 11px; }
+.rule-status { white-space: nowrap; }
+.rule-status.over { color: #fff; font-weight: 600; }
+.progress-fill.over { background: repeating-linear-gradient(45deg, #fff 0 4px, #777 4px 8px); }

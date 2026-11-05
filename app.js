@@ -707,6 +707,7 @@ function renderOverview() {
       ${metricCard('Pessoais', personal, 'limites individuais', 'heart', '#292929')}
       ${metricCard('Para reservar', reserve, 'sugestão de 20%', 'target', '#262626')}
     </section>
+    ${renderRule503020(income, txs)}
     <div class="section-grid">
       <section class="panel"><div class="panel-heading"><div><h2 class="panel-title">Para onde está indo</h2><p class="panel-kicker">os maiores pedaços do orçamento</p></div><button class="link-button" data-view="transactions">ver tudo</button></div><div class="category-list">${categoryTotals.length ? categoryTotals.slice(0, 5).map((item, index) => { const meta = categoryMeta[item.key]; return `<div class="category-row">${iconFor(item.key)}<div class="category-info"><div class="category-line"><span class="category-name">${meta.label}</span><span class="category-amount">${money(item.value)}</span></div><div class="progress-track"><div class="progress-fill ${index === 1 ? 'sage' : index === 2 ? 'yellow' : ''}" style="width:${Math.round((item.value / maxCategory) * 100)}%"></div></div></div><span class="category-total">${income ? Math.round(item.value / income * 100) : 0}%</span></div>`; }).join('') : emptyState('Ainda não há lançamentos neste mês.')}</div></section>
       <div><section class="panel"><div class="panel-heading"><div><h2 class="panel-title">Um limite para cada um</h2><p class="panel-kicker">liberdade sem perder o combinado</p></div><button class="link-button" data-view="planning">editar</button></div><div class="people-grid">${people.map(({ person, value }, index) => { const limit = state.limits[person] || 0; const percent = limit ? Math.min(100, Math.round(value / limit * 100)) : 0; return `<div class="person-card ${index ? 'sage-card' : ''}"><div class="person-top"><span class="avatar">${personInitials(person)}</span><div><p class="person-name">${personLabel(person)}</p><p class="person-desc">gastos pessoais</p></div></div><div class="person-amount">${money(value)}</div><span class="person-limit">de ${money(limit)} combinados</span><div class="person-bar"><span style="width:${percent}%"></span></div></div>`; }).join('')}</div></section>
@@ -714,6 +715,31 @@ function renderOverview() {
     </div>
     <section class="panel" style="margin-top:14px"><div class="panel-heading"><div><h2 class="panel-title">Metas que vocês escolheram</h2><p class="panel-kicker">cada pequeno passo soma</p></div><button class="link-button" data-action="edit-goals">Editar metas</button></div><div class="goal-list">${state.goals.map(goalCard).join('')}</div></section>
   </div>`;
+}
+
+const RULE_NEEDS = ['moradia', 'mercado', 'transporte'];
+
+function renderRule503020(income, txs) {
+  const sumOf = (list) => list.reduce((total, tx) => total + Number(tx.amount), 0);
+  const needs = sumOf(txs.filter((tx) => RULE_NEEDS.includes(tx.category)));
+  const wants = sumOf(txs.filter((tx) => !RULE_NEEDS.includes(tx.category)));
+  const saved = Math.max(0, income - needs - wants);
+  const rows = [
+    { name: 'Necessidades', pct: 50, spent: needs, hint: 'moradia, mercado e transporte', kind: 'max' },
+    { name: 'Desejos', pct: 30, spent: wants, hint: 'lazer, pessoal e outros', kind: 'max' },
+    { name: 'Poupança', pct: 20, spent: saved, hint: 'o que sobra depois dos gastos', kind: 'min' }
+  ];
+  const body = income ? rows.map((row) => {
+    const target = income * row.pct / 100;
+    const fill = target ? Math.min(100, Math.round(row.spent / target * 100)) : 0;
+    const share = Math.round(row.spent / income * 100);
+    const over = row.kind === 'max' && row.spent > target;
+    const status = row.kind === 'max'
+      ? (over ? `passou ${money(row.spent - target)}` : `restam ${money(target - row.spent)}`)
+      : (row.spent >= target ? 'meta batida' : `faltam ${money(target - row.spent)}`);
+    return `<div class="rule-row"><div class="rule-head"><span class="rule-name">${row.name} <small>${row.pct}%</small></span><span class="rule-amount">${money(row.spent)} <small>de ${money(target)}</small></span></div><div class="progress-track"><div class="progress-fill ${over ? 'over' : ''}" style="width:${fill}%"></div></div><div class="rule-foot"><span>${row.hint} · ${share}% da renda</span><span class="rule-status${over ? ' over' : ''}">${status}</span></div></div>`;
+  }).join('') : '<p class="helper-note">Adicione um salário neste mês para ver a divisão 50 / 30 / 20.</p>';
+  return `<section class="panel rule-panel" style="margin-bottom:14px"><div class="panel-heading"><div><h2 class="panel-title">Regra 50 · 30 · 20</h2><p class="panel-kicker">metade para o essencial, 30% para desejos, 20% para o futuro</p></div></div><div class="rule-list">${body}</div></section>`;
 }
 
 function metricCard(label, value, detail, icon, bg) {
