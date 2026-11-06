@@ -33,3 +33,5 @@ e nunca apaga nem altera um registro que já exista.
 
 Não coloque neste repositório e-mails de pessoas, backups com dados reais nem chaves secretas
 (`service_role` ou `secret`).
+
+<!-- Pequena atualização do projeto -->
